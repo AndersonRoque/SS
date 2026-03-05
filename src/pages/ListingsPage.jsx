@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PROPERTIES } from "../data/properties";
 import PropertyCard from "../components/ui/PropertyCard";
@@ -14,8 +14,17 @@ export default function ListingsPage() {
   const [beds,setBeds] = useState("0");
   const [pi,setPi] = useState(0);
   const [sort,setSort] = useState("recent");
+
+  // Correcao: atualiza os filtros quando a URL muda (ex: clicar Comprar/Alugar no menu)
+  useEffect(() => {
+    setType(sp.get("type") || "sale");
+    setQuery(sp.get("q") || "");
+    setPi(0);
+  }, [sp]);
+
   const ranges = type === "sale" ? PRICE_SALE : PRICE_RENT;
   const {min:pMin, max:pMax} = ranges[pi] || ranges[0];
+
   const filtered = useMemo(() => {
     let list = PROPERTIES.filter(p => p.type === type);
     if (query.trim()) {
@@ -29,6 +38,7 @@ export default function ListingsPage() {
     if (sort === "area-desc") list = [...list].sort((a,b) => b.area - a.area);
     return list;
   }, [type, query, beds, pMin, pMax, sort]);
+
   return (
     <div className="listings-page page-enter">
       <div className="filter-bar">
