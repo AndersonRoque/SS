@@ -17,6 +17,33 @@
 .prop-section__text{font-size:15px;color:var(--text-secondary);line-height:1.8;}
 .highlights{display:flex;flex-wrap:wrap;gap:10px;}
 .highlight-tag{padding:8px 14px;background:var(--cream);border:1px solid var(--cream-dark);border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--navy);}
+
+/* ── MAPA ── */
+.property-map{
+  width: 100%;
+  height: 420px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-md);
+  z-index: 0;
+}
+.map-marker{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-marker__pin{
+  width: 22px;
+  height: 22px;
+  background: var(--gold);
+  border: 3px solid var(--navy);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 8px rgba(10,22,40,0.3);
+}
+
+/* ── STATS ── */
 .stat-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
 .stat-kpi{background:var(--cream);border-radius:var(--radius-md);padding:16px;display:flex;flex-direction:column;gap:6px;}
 .stat-kpi__value{font-size:18px;font-weight:700;color:var(--navy);}
@@ -27,6 +54,8 @@
 .chart-tab.active{background:var(--navy);color:var(--white);}
 .chart-wrap{background:var(--gray-100);border-radius:var(--radius-md);padding:16px;}
 .chart-subtitle{font-size:15px;font-weight:600;color:var(--navy);margin:28px 0 12px;}
+
+/* ── SIDEBAR ── */
 .prop-sidebar-card{background:var(--white);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-md);border:1px solid var(--gray-200);position:sticky;top:152px;margin-bottom:20px;}
 .prop-sidebar__price{font-family:var(--font-display);font-size:32px;color:var(--navy);margin-bottom:6px;}
 .prop-sidebar__addr{font-size:14px;font-weight:500;color:var(--text-primary);}
