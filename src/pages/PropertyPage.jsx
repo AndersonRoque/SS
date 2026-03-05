@@ -1,8 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { PROPERTIES, HISTORICAL_DATA, formatPrice } from "../data/properties";
 import "./PropertyPage.css";
+
+function PropertyMap({ lat, lng, title, address }) {
+  const mapRef = useRef(null);
+  const instanceRef = useRef(null);
+
+  useEffect(() => {
+    if (!mapRef.current || instanceRef.current) return;
+    const L = window.L;
+    if (!L) return;
+
+    const map = L.map(mapRef.current, { zoomControl: true, scrollWheelZoom: false }).setView([lat, lng], 15);
+    instanceRef.current = map;
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+    }).addTo(map);
+
+    const icon = L.divIcon({
+      className: "",
+      html: `<div class="map-marker"><div class="map-marker__pin"></div></div>`,
+      iconSize: [40, 40],
+      iconAnchor: [20, 40],
+    });
+
+    L.marker([lat, lng], { icon })
+      .addTo(map)
+      .bindPopup(`<strong>${title}</strong><br/>${address}`)
+      .openPopup();
+
+    return () => {
+      map.remove();
+      instanceRef.current = null;
+    };
+  }, [lat, lng, title, address]);
+
+  return <div ref={mapRef} className="property-map" />;
+}
 
 export default function PropertyPage() {
   const {id} = useParams();
@@ -10,16 +48,19 @@ export default function PropertyPage() {
   const property = PROPERTIES.find(p => p.id === Number(id));
   const [imgIdx, setImgIdx] = useState(0);
   const [chartTab, setChartTab] = useState("priceM2");
+
   if (!property) return (
     <div className="prop-notfound">
       <h2>Imovel nao encontrado</h2>
       <button onClick={() => navigate("/imoveis")}>Voltar</button>
     </div>
   );
+
   const hist = HISTORICAL_DATA[property.neighborhood] || null;
-  const {title,type,price,address,neighborhood,city,state,bedrooms,bathrooms,parkingSpots,area,floor,yearBuilt,description,highlights,images,pricePerM2,isNew,agent} = property;
+  const {title,type,price,address,neighborhood,city,state,bedrooms,bathrooms,parkingSpots,area,floor,yearBuilt,description,highlights,images,pricePerM2,isNew,agent,lat,lng} = property;
   const fmt = v => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}).format(v);
   const chartData = hist ? hist[chartTab].map(d => ({year:d.year, value:d.value, ref:Math.round(d.value*0.88)})) : [];
+
   return (
     <div className="prop-page page-enter">
       <div className="prop-page__breadcrumb container">
@@ -29,6 +70,8 @@ export default function PropertyPage() {
       </div>
       <div className="container prop-page__layout">
         <div className="prop-page__left">
+
+          {/* Galeria */}
           <div className="gallery">
             <div className="gallery__main">
               <img src={images[imgIdx]} alt={title} className="gallery__main-img" />
@@ -47,16 +90,29 @@ export default function PropertyPage() {
               </div>
             )}
           </div>
+
+          {/* Descricao */}
           <div className="prop-section">
             <h2 className="prop-section__title">Sobre o imovel</h2>
             <p className="prop-section__text">{description}</p>
           </div>
+
+          {/* Diferenciais */}
           <div className="prop-section">
             <h2 className="prop-section__title">Diferenciais</h2>
             <div className="highlights">
               {highlights.map(h => <span key={h} className="highlight-tag">{h}</span>)}
             </div>
           </div>
+
+          {/* MAPA */}
+          <div className="prop-section">
+            <h2 className="prop-section__title">Localizacao</h2>
+            <p className="prop-section__sub">{address} — {neighborhood}, {city}, {state}</p>
+            <PropertyMap lat={lat} lng={lng} title={title} address={address} />
+          </div>
+
+          {/* Historico de Mercado */}
           {hist && (
             <div className="prop-section market-stats">
               <h2 className="prop-section__title">Historico de Mercado - {neighborhood}</h2>
@@ -106,6 +162,8 @@ export default function PropertyPage() {
             </div>
           )}
         </div>
+
+        {/* Sidebar */}
         <div className="prop-page__right">
           <div className="prop-sidebar-card">
             <p className="prop-sidebar__price">{formatPrice(price,type)}</p>
